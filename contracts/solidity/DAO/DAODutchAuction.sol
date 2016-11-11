@@ -187,8 +187,6 @@ contract DAODutchAuction {
         return endTime + WAITING_PERIOD < block.timestamp;
     }
 
-    // updateStage allows calls to receive correct stage. It can be used for transactions but is not part of the regular token creation routine.
-    // It is not marked as constant because timedTransitions modifier is altering state and constant is not yet enforced by solc.
     /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called successfully.
     /// @return _stage Returns current auction stage.
     function updateStage()
@@ -197,5 +195,18 @@ contract DAODutchAuction {
         returns (Stages _stage)
     {
         return stage;
+    }
+
+    /// @dev Calculates current token price.
+    /// @return tokenPrice Returns token price.
+    function calcCurrentTokenPrice()
+        external
+        timedTransitions
+        returns (uint tokenPrice)
+    {
+        if (stage == Stages.AuctionEnded) {
+            return finalPrice;
+        }
+        return calcTokenPrice();
     }
 }
