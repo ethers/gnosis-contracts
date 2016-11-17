@@ -14,8 +14,7 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.event_factory_name, self.outcome_token_library_name, self.dao_name,
-                                 self.dao_token_name, self.dao_auction_name]
+        self.deploy_contracts = [self.dao_token_name, self.dao_auction_name]
 
     def test(self):
         # Create mist wallet
@@ -42,10 +41,8 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dao.setup(self.event_factory.address, self.mist_wallet.address)
         self.dao_auction.setup(self.dao_token.address, self.multisig_wallet.address, self.mist_wallet.address)
         # Setups cannot be done twice
-        self.assertRaises(TransactionFailed, self.dao.setup, self.event_factory.address, self.mist_wallet.address)
         self.assertRaises(TransactionFailed, self.dao_auction.setup, self.dao_token.address, self.mist_wallet.address)
         # Bidder 1 places a bid in the first block after auction starts
         self.assertEqual(self.dao_auction.calcTokenPrice(), 20000 * 10**18)
@@ -110,14 +107,3 @@ class TestContract(AbstractTestContract):
         self.assertTrue(
             self.dao_token.transferFrom(accounts[bidder_4], accounts[bidder_3], transfer_shares, sender=keys[bidder_3]))
         self.assertEqual(self.dao_token.balanceOf(accounts[bidder_4]), 0)
-        # Now we want to change the DAO contract.
-        self.assertEqual(self.event_factory.getDAO(), self.dao.address.encode('hex'))
-        # We deploy a new DAO.
-        dao_2 = self.s.abi_contract(self.pp.process(self.dao_name, add_dev_code=True, contract_dir=self.contract_dir),
-                                    language='solidity')
-        dao_2.setup(self.event_factory.address, self.mist_wallet.address)
-        dao_abi = self.dao.translator
-        tx_data = dao_abi.encode("changeDAO", [dao_2.address])
-        self.mist_wallet.execute(self.dao.address, 0, tx_data)
-        # The events contract points now to the new DAO contract.
-        self.assertEqual(self.event_factory.getDAO(), dao_2.address.encode('hex'))
