@@ -105,22 +105,6 @@ contract DAODutchAuction {
         BidSubmission(msg.sender, investment);
     }
 
-    function finalizeAuction()
-        private
-    {
-        stage = Stages.AuctionEnded;
-        if (totalRaised == FUNDING_GOAL) {
-            finalPrice = calcTokenPrice();
-        }
-        else {
-            finalPrice = calcStopPrice();
-        }
-        uint soldTokens = totalRaised * 10**18 / finalPrice;
-        // Auction contract transfers all unsold tokens to founders' multisig-wallet
-        daoToken.transfer(tokenWallet, TOTAL_TOKENS * 10**18 - soldTokens);
-        endTime = block.timestamp;
-    }
-
     /// @dev Claims tokens for bidder after auction.
     function claimTokens()
         public
@@ -208,5 +192,21 @@ contract DAODutchAuction {
             return finalPrice;
         }
         return calcTokenPrice();
+    }
+
+    function finalizeAuction()
+        private
+    {
+        stage = Stages.AuctionEnded;
+        if (totalRaised == FUNDING_GOAL) {
+            finalPrice = calcTokenPrice();
+        }
+        else {
+            finalPrice = calcStopPrice();
+        }
+        uint soldTokens = totalRaised * 10**18 / finalPrice;
+        // Auction contract transfers all unsold tokens to founders' multisig-wallet
+        daoToken.transfer(tokenWallet, TOTAL_TOKENS * 10**18 - soldTokens);
+        endTime = block.timestamp;
     }
 }
