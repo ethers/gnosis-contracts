@@ -73,8 +73,66 @@ contract DAODutchAuction {
     uint constant public TOTAL_TOKENS = 10000000; // 10M
     uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
 
+    /// @dev Contract constructor function sets start date.
+    function DAODutchAuction() {
+        startBlock = block.number;
+        owner = msg.sender;
+    }
+
+    /// @dev Setup function sets external contracts' addresses.
+    /// @param _daoToken DAO token address.
+    /// @param _tokenWallet DAO founders address.
+    function setup(address _daoToken, address _tokenWallet, address _etherWallet)
+        external
+        isOwner
+    {
+        if (tokenWallet != 0 || etherWallet != 0 || address(daoToken) != 0) {
+            // Setup was executed already
+            throw;
+        }
+        tokenWallet = _tokenWallet;
+        etherWallet = _etherWallet;
+        daoToken = Token(_daoToken);
+    }
+
     /*
-     *  Read and write functions
+     * External functions
+     */
+    /// @dev Returns if one week after auction passed.
+    /// @return launched Returns if one week after auction passed.
+    function tokenLaunched()
+        external
+        timedTransitions
+        returns (bool launched)
+    {
+        return endTime + WAITING_PERIOD < block.timestamp;
+    }
+
+    /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called successfully.
+    /// @return _stage Returns current auction stage.
+    function updateStage()
+        external
+        timedTransitions
+        returns (Stages _stage)
+    {
+        return stage;
+    }
+
+    /// @dev Calculates current token price.
+    /// @return tokenPrice Returns token price.
+    function calcCurrentTokenPrice()
+        external
+        timedTransitions
+        returns (uint tokenPrice)
+    {
+        if (stage == Stages.AuctionEnded) {
+            return finalPrice;
+        }
+        return calcTokenPrice();
+    }
+
+    /*
+     *  Public functions
      */
     /// @dev Allows to send a bid to the auction.
     function bid()
@@ -116,28 +174,6 @@ contract DAODutchAuction {
         daoToken.transfer(msg.sender, tokenCount);
     }
 
-    /// @dev Setup function sets external contracts' addresses.
-    /// @param _daoToken DAO token address.
-    /// @param _tokenWallet DAO founders address.
-    function setup(address _daoToken, address _tokenWallet, address _etherWallet)
-        external
-        isOwner
-    {
-        if (tokenWallet != 0 || etherWallet != 0 || address(daoToken) != 0) {
-            // Setup was executed already
-            throw;
-        }
-        tokenWallet = _tokenWallet;
-        etherWallet = _etherWallet;
-        daoToken = Token(_daoToken);
-    }
-
-    /// @dev Contract constructor function sets start date.
-    function DAODutchAuction() {
-        startBlock = block.number;
-        owner = msg.sender;
-    }
-
     /*
      *  Read functions
      */
@@ -159,39 +195,6 @@ contract DAODutchAuction {
         returns (uint tokenPrice)
     {
         return 20000 * 1 ether / (block.number - startBlock + 1);
-    }
-
-    /// @dev Returns if one week after auction passed.
-    /// @return launched Returns if one week after auction passed.
-    function tokenLaunched()
-        external
-        timedTransitions
-        returns (bool launched)
-    {
-        return endTime + WAITING_PERIOD < block.timestamp;
-    }
-
-    /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called successfully.
-    /// @return _stage Returns current auction stage.
-    function updateStage()
-        external
-        timedTransitions
-        returns (Stages _stage)
-    {
-        return stage;
-    }
-
-    /// @dev Calculates current token price.
-    /// @return tokenPrice Returns token price.
-    function calcCurrentTokenPrice()
-        external
-        timedTransitions
-        returns (uint tokenPrice)
-    {
-        if (stage == Stages.AuctionEnded) {
-            return finalPrice;
-        }
-        return calcTokenPrice();
     }
 
     function finalizeAuction()
