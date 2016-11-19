@@ -73,63 +73,10 @@ contract DAODutchAuction {
     uint constant public TOTAL_TOKENS = 10000000; // 10M
     uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
 
-    /*
-     *  Read and write functions
-     */
-    /// @dev Allows to send a bid to the auction.
-    function bid()
-        public
-        payable
-        timedTransitions
-        atStage(Stages.AuctionStarted)
-    {
-        uint investment = msg.value;
-        if (totalRaised + investment > FUNDING_GOAL) {
-            investment = FUNDING_GOAL - totalRaised;
-            // Send change back
-            if (!msg.sender.send(msg.value - investment)) {
-                // Sending failed
-                throw;
-            }
-        }
-        // Forward funding to ether wallet
-        if (investment == 0 || !etherWallet.send(investment)) {
-            // No investment done or sending failed
-            throw;
-        }
-        bids[msg.sender] += investment;
-        totalRaised += investment;
-        if (totalRaised == FUNDING_GOAL) {
-            finalizeAuction();
-        }
-        BidSubmission(msg.sender, investment);
-    }
-
-    function finalizeAuction()
-        private
-    {
-        stage = Stages.AuctionEnded;
-        if (totalRaised == FUNDING_GOAL) {
-            finalPrice = calcTokenPrice();
-        }
-        else {
-            finalPrice = calcStopPrice();
-        }
-        uint soldTokens = totalRaised * 10**18 / finalPrice;
-        // Auction contract transfers all unsold tokens to founders' multisig-wallet
-        daoToken.transfer(tokenWallet, TOTAL_TOKENS * 10**18 - soldTokens);
-        endTime = block.timestamp;
-    }
-
-    /// @dev Claims tokens for bidder after auction.
-    function claimTokens()
-        public
-        timedTransitions
-        atStage(Stages.AuctionEnded)
-    {
-        uint tokenCount = bids[msg.sender] * 10**18 / finalPrice;
-        bids[msg.sender] = 0;
-        daoToken.transfer(msg.sender, tokenCount);
+    /// @dev Contract constructor function sets start date.
+    function DAODutchAuction() {
+        startBlock = block.number;
+        owner = msg.sender;
     }
 
     /// @dev Setup function sets external contracts' addresses.
@@ -148,35 +95,9 @@ contract DAODutchAuction {
         daoToken = Token(_daoToken);
     }
 
-    /// @dev Contract constructor function sets start date.
-    function DAODutchAuction() {
-        startBlock = block.number;
-        owner = msg.sender;
-    }
-
     /*
-     *  Read functions
+     * External functions
      */
-    /// @dev Calculates stop price.
-    /// @return stopPrice Returns stop price.
-    function calcStopPrice()
-        constant
-        public
-        returns (uint stopPrice)
-    {
-        return totalRaised / MAX_TOKENS_SOLD;
-    }
-
-    /// @dev Calculates token price.
-    /// @return tokenPrice Returns token price.
-    function calcTokenPrice()
-        constant
-        public
-        returns (uint tokenPrice)
-    {
-        return 20000 * 1 ether / (block.number - startBlock + 1);
-    }
-
     /// @dev Returns if one week after auction passed.
     /// @return launched Returns if one week after auction passed.
     function tokenLaunched()
@@ -208,5 +129,87 @@ contract DAODutchAuction {
             return finalPrice;
         }
         return calcTokenPrice();
+    }
+
+    /*
+     *  Public functions
+     */
+    /// @dev Allows to send a bid to the auction.
+    function bid()
+        public
+        payable
+        timedTransitions
+        atStage(Stages.AuctionStarted)
+    {
+        uint investment = msg.value;
+        if (totalRaised + investment > FUNDING_GOAL) {
+            investment = FUNDING_GOAL - totalRaised;
+            // Send change back
+            if (!msg.sender.send(msg.value - investment)) {
+                // Sending failed
+                throw;
+            }
+        }
+        // Forward funding to ether wallet
+        if (investment == 0 || !etherWallet.send(investment)) {
+            // No investment done or sending failed
+            throw;
+        }
+        bids[msg.sender] += investment;
+        totalRaised += investment;
+        if (totalRaised == FUNDING_GOAL) {
+            finalizeAuction();
+        }
+        BidSubmission(msg.sender, investment);
+    }
+
+    /// @dev Claims tokens for bidder after auction.
+    function claimTokens()
+        public
+        timedTransitions
+        atStage(Stages.AuctionEnded)
+    {
+        uint tokenCount = bids[msg.sender] * 10**18 / finalPrice;
+        bids[msg.sender] = 0;
+        daoToken.transfer(msg.sender, tokenCount);
+    }
+
+    /*
+     *  Read functions
+     */
+    /// @dev Calculates stop price.
+    /// @return stopPrice Returns stop price.
+    function calcStopPrice()
+        constant
+        public
+        returns (uint stopPrice)
+    {
+        return totalRaised / MAX_TOKENS_SOLD;
+    }
+
+    /// @dev Calculates token price.
+    /// @return tokenPrice Returns token price.
+    function calcTokenPrice()
+        constant
+        public
+        returns (uint tokenPrice)
+    {
+        return 20000 * 1 ether / (block.number - startBlock + 1);
+    }
+
+    function finalizeAuction()
+        private
+    {
+        stage = Stages.AuctionEnded;
+        if (totalRaised == FUNDING_GOAL) {
+            finalPrice = calcTokenPrice();
+        }
+        else {
+            finalPrice = calcStopPrice();
+        }
+        uint soldTokens = totalRaised * 10**18 / finalPrice;
+        // Auction contract transfers all unsold tokens to founders' multisig-wallet
+        daoToken.transfer(tokenWallet, TOTAL_TOKENS * 10**18 - soldTokens);
+        endTime = block.timestamp;
     }
 }
