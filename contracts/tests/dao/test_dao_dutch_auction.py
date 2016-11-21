@@ -58,7 +58,7 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.dao_auction.calcStopPrice(), value_1 / 9000000)
         # Bidder 2 places a bid
         bidder_2 = 1
-        value_2 = 500000 * 10**18  # 1M Ether
+        value_2 = 500000 * 10**18  # 500k Ether
         self.s.block.set_balance(accounts[bidder_2], value_2*2)
         self.dao_auction.bid(sender=keys[bidder_2], value=value_2)
         # Stop price changed
@@ -66,15 +66,20 @@ class TestContract(AbstractTestContract):
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*3
         self.assertEqual(self.dao_auction.calcTokenPrice(), 20000 * 10 ** 18 / (self.BLOCKS_PER_DAY*5 + 1))
+        self.assertEqual(self.dao_auction.calcStopPrice(), (value_1 + value_2) / 9000000)
         # Bidder 2 tries to send 0 bid to update last price
         self.assertRaises(TransactionFailed, self.dao_auction.bid, sender=keys[bidder_2], value=0)
         # Bidder 3 places a bid
         bidder_3 = 2
-        value_3 = 500000 * 10 ** 18  # 1M Ether
+        value_3 = 500000 * 10 ** 18  # 500k Ether
         self.s.block.set_balance(accounts[bidder_3], value_3 * 2)
         self.dao_auction.bid(sender=keys[bidder_3], value=value_3)
+        wei_bid3 = value_3 / 2
+        refund_bidder3 = wei_bid3
+        # Bidder 3 gets refund; but paid gas so balance isn't exactly 0.75M Ether
+        self.assertTrue(self.s.block.get_balance(accounts[bidder_3]) > 0.9999*(value_3 + refund_bidder3))
+        self.assertEqual(self.dao_auction.calcStopPrice(), (value_1 + value_2 + wei_bid3) / 9000000)
         # Auction is over, no more bids are accepted
-        self.s.block.set_balance(accounts[bidder_3], value_3 * 2)
         self.assertRaises(TransactionFailed, self.dao_auction.bid, sender=keys[bidder_3], value=value_3)
         self.assertEqual(self.dao_auction.finalPrice(), self.dao_auction.calcTokenPrice())
         # There is no money left in the contract
