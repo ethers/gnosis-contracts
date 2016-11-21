@@ -94,16 +94,20 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.dao_token.balanceOf(accounts[bidder_2]),
                          value_2 * 10 ** 18 / self.dao_auction.finalPrice())
         self.assertEqual(self.dao_token.balanceOf(accounts[bidder_3]),
-                         value_3 / 2 * 10 ** 18 / self.dao_auction.finalPrice())
+                         wei_bid3 * 10 ** 18 / self.dao_auction.finalPrice())
         self.assertEqual(self.dao_token.balanceOf(self.multisig_wallet.address),
                          self.TOTAL_TOKENS - self.dao_auction.totalRaised() * 10 ** 18 / self.dao_auction.finalPrice())
         self.assertEqual(self.dao_token.totalSupply(), self.TOTAL_TOKENS)
+        self.assertEqual(self.dao_auction.totalRaised() / 1e18, 1.25e6)
         # Auction ended but trading is not possible yet, because there is one week pause after auction ends
         transfer_shares = 1000
         bidder_4 = 3
         self.assertRaises(TransactionFailed, self.dao_token.transfer, accounts[bidder_4], transfer_shares, sender=keys[bidder_3])
         # We wait for one week
-        self.s.block.timestamp += self.WAITING_PERIOD + 1
+        self.s.block.timestamp += self.WAITING_PERIOD
+        self.assertRaises(TransactionFailed, self.dao_token.transfer, accounts[bidder_4], transfer_shares, sender=keys[bidder_3])
+        # Go past one week
+        self.s.block.timestamp += 1
         # Shares can be traded now. Backer 3 transfers 1000 shares to backer 4.
         self.assertTrue(self.dao_token.transfer(accounts[bidder_4], transfer_shares, sender=keys[bidder_3]))
         self.assertEqual(self.dao_token.balanceOf(accounts[bidder_4]), transfer_shares)
