@@ -13,7 +13,7 @@ contract StandardToken is Token {
     uint256 public totalSupply;
 
     /*
-     *  Read and write functions
+     *  Public functions
      */
     /// @dev Transfers sender's tokens to a given address. Returns success.
     /// @param _to Address of token receiver.

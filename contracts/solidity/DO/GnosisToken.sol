@@ -1,11 +1,11 @@
 pragma solidity 0.4.4;
 import "Tokens/StandardToken.sol";
-import "DAO/AbstractDAOAuction.sol";
+import "DO/AbstractDutchAuction.sol";
 
 
 /// @title Gnosis token contract - Holds tokens of Gnosis.
 /// @author Stefan George - <stefan.george@consensys.net>
-contract DAOToken is StandardToken {
+contract GnosisToken is StandardToken {
 
     /*
      *  Token meta data
@@ -17,13 +17,13 @@ contract DAOToken is StandardToken {
     /*
      *  External contracts
      */
-    DAOAuction public daoAuction;
+    DutchAuction public dutchAuction;
 
     /*
      *  Modifiers
      */
     modifier tokenLaunched() {
-        if (!daoAuction.tokenLaunched() && msg.sender != address(daoAuction)) {
+        if (!dutchAuction.tokenLaunched() && msg.sender != address(dutchAuction)) {
             // Token was not launched yet and sender is not auction contract
             throw;
         }
@@ -31,8 +31,18 @@ contract DAOToken is StandardToken {
     }
 
     /*
-     *  Read and write functions
+     *  Public functions
      */
+    /// @dev Contract constructor function sets owner.
+    function GnosisToken(address _dutchAuction)
+        public
+    {
+        dutchAuction = DutchAuction(_dutchAuction);
+        uint _totalSupply = 10000000 * 10**18;
+        balances[_dutchAuction] = _totalSupply;
+        totalSupply = _totalSupply;
+    }
+
     /// @dev Transfers sender's tokens to a given address. Returns success.
     /// @param to Address of token receiver.
     /// @param value Number of tokens to transfer.
@@ -56,13 +66,5 @@ contract DAOToken is StandardToken {
         returns (bool)
     {
         return super.transferFrom(from, to, value);
-    }
-
-     /// @dev Contract constructor function sets owner.
-    function DAOToken(address _daoAuction) {
-        daoAuction = DAOAuction(_daoAuction);
-        uint _totalSupply = 10000000 * 10**18;
-        balances[_daoAuction] = _totalSupply;
-        totalSupply = _totalSupply;
     }
 }

@@ -22,7 +22,7 @@ class AbstractTestContract(TestCase):
     HOMESTEAD_BLOCK = 1150000
 
     EVENT_MANAGER_DIR = 'EventFactory/'
-    DAO_DIR = 'DAO/'
+    DO_DIR = 'DO/'
     UTILS_DIR = 'Utils/'
     ORACLES_DIR = 'Oracles/'
     MARKET_MANAGERS_DIR = 'MarketFactories/'
@@ -45,9 +45,9 @@ class AbstractTestContract(TestCase):
         self.event_factory_name = self.EVENT_MANAGER_DIR + 'EventFactory.sol'
         self.outcome_token_name = self.EVENT_MANAGER_DIR + 'OutcomeToken.sol'
         self.outcome_token_library_name = self.EVENT_MANAGER_DIR + 'OutcomeTokenLibrary.sol'
-        self.dao_name = self.DAO_DIR + 'DAO.sol'
-        self.dao_auction_name = self.DAO_DIR + 'DAODutchAuction.sol'
-        self.dao_token_name = self.DAO_DIR + 'DAOToken.sol'
+        self.do_name = self.DO_DIR + 'DO.sol'
+        self.dutch_auction_name = self.DO_DIR + 'DutchAuction.sol'
+        self.gnosis_token_name = self.DO_DIR + 'GnosisToken.sol'
         self.ether_token_name = self.TOKENS_DIR + 'EtherToken.sol'
         self.hunchgame_name = self.MARKET_MANAGERS_DIR + 'HunchGameMarketFactory.sol'
         self.hunchgame_token_name = self.TOKENS_DIR + 'HunchGameToken.sol'
@@ -63,20 +63,20 @@ class AbstractTestContract(TestCase):
         self.oraclize_oracle_name = self.ORACLES_DIR + 'OraclizeOracle.sol'
 
     def setUp(self):
-        if self.dao_name in self.deploy_contracts:
-            self.dao = self.s.abi_contract(self.pp.process(self.dao_name,
-                                                           add_dev_code=True,
-                                                           contract_dir=self.contract_dir), language='solidity')
-        if self.dao_auction_name in self.deploy_contracts:
-            self.dao_auction = self.s.abi_contract(self.pp.process(self.dao_auction_name,
-                                                                   add_dev_code=True,
-                                                                   contract_dir=self.contract_dir), language='solidity')
-        if self.dao_token_name in self.deploy_contracts:
-            self.dao_token = self.s.abi_contract(self.pp.process(self.dao_token_name,
-                                                                 add_dev_code=True,
-                                                                 contract_dir=self.contract_dir),
-                                                 language='solidity',
-                                                 constructor_parameters=[self.dao_auction.address])
+        if self.do_name in self.deploy_contracts:
+            self.do = self.s.abi_contract(self.pp.process(self.do_name,
+                                                          add_dev_code=True,
+                                                          contract_dir=self.contract_dir), language='solidity')
+        if self.dutch_auction_name in self.deploy_contracts:
+            self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
+                                                                     add_dev_code=True,
+                                                                     contract_dir=self.contract_dir), language='solidity')
+        if self.gnosis_token_name in self.deploy_contracts:
+            self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
+                                                                    add_dev_code=True,
+                                                                    contract_dir=self.contract_dir),
+                                                    language='solidity',
+                                                    constructor_parameters=[self.dutch_auction.address])
         if self.outcome_token_library_name in self.deploy_contracts:
             self.outcome_token_library = self.s.abi_contract(self.pp.process(self.outcome_token_library_name,
                                                                              add_dev_code=True,
@@ -87,7 +87,7 @@ class AbstractTestContract(TestCase):
                                                                      add_dev_code=True,
                                                                      contract_dir=self.contract_dir,
                                                                      addresses={
-                                                                            'DAO': self.a2h(self.dao)
+                                                                            'DAO': self.a2h(self.do)
                                                                         }),
                                                      language='solidity',
                                                      libraries={

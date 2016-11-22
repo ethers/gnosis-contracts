@@ -29,19 +29,19 @@
     },
     {
         "type": "deployment",
-        "file": "DAO/DAODutchAuction.sol"
+        "file": "DO/DutchAuction.sol"
     },
     {
         "type": "deployment",
-        "file": "DAO/DAOToken.sol",
-        "params": ["DAODutchAuction"]
+        "file": "DO/GnosisToken.sol",
+        "params": ["DutchAuction"]
     },
     {
         "type": "transaction",
-        "contract": "DAODutchAuction",
+        "contract": "DutchAuction",
         "name": "setup",
         "params": [
-            "DAOToken", "MultiSigWallet"
+            "GnosisToken", "MultiSigWallet"
         ]
     }
 ]

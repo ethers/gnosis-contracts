@@ -2,9 +2,9 @@ pragma solidity 0.4.4;
 import "Tokens/AbstractToken.sol";
 
 
-/// @title DAO Dutch auction contract - Sale of Gnosis tokens.
+/// @title Dutch auction contract - Sale of Gnosis tokens.
 /// @author Stefan George - <stefan.george@consensys.net>
-contract DAODutchAuction {
+contract DutchAuction {
 
     /*
      *  Events
@@ -12,28 +12,29 @@ contract DAODutchAuction {
     event BidSubmission(address indexed investor, uint256 amount);
 
     /*
-     *  External contracts
-     */
-    Token public daoToken;
-
-    /*
      *  Constants
      */
+    uint constant public FUNDING_GOAL = 1250000 ether;
+    uint constant public TOTAL_TOKENS = 10000000; // 10M
+    uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
     uint constant public WAITING_PERIOD = 7 days;
 
     /*
      *  Storage
      */
+    Token public gnosisToken;
     address public wallet;
     address public owner;
     uint public startBlock;
     uint public endTime;
     uint public totalRaised;
     uint public finalPrice;
-    // user => amount
     mapping (address => uint) public bids;
     Stages public stage = Stages.AuctionStarted;
 
+    /*
+     *  Enums
+     */
     enum Stages {
         AuctionStarted,
         AuctionEnded
@@ -66,50 +67,45 @@ contract DAODutchAuction {
     }
 
     /*
-     *  Constants
+     *  Public functions
      */
-    uint constant public FUNDING_GOAL = 1250000 ether;
-    uint constant public TOTAL_TOKENS = 10000000; // 10M
-    uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
-
     /// @dev Contract constructor function sets start date.
-    function DAODutchAuction() {
+    function DutchAuction()
+        public
+    {
         startBlock = block.number;
         owner = msg.sender;
     }
 
     /// @dev Setup function sets external contracts' addresses.
-    /// @param _daoToken DAO token address.
-    /// @param _wallet DAO founders address.
-    function setup(address _daoToken, address _wallet)
-        external
+    /// @param _gnosisToken Gnosis token address.
+    /// @param _wallet Gnosis founders address.
+    function setup(address _gnosisToken, address _wallet)
+        public
         isOwner
     {
-        if (wallet != 0 || address(daoToken) != 0) {
+        if (wallet != 0 || address(gnosisToken) != 0) {
             // Setup was executed already
             throw;
         }
         wallet = _wallet;
-        daoToken = Token(_daoToken);
+        gnosisToken = Token(_gnosisToken);
     }
 
-    /*
-     * External functions
-     */
     /// @dev Returns if one week after auction passed.
     /// @return Returns if one week after auction passed.
     function tokenLaunched()
-        external
+        public
         timedTransitions
         returns (bool)
     {
         return endTime + WAITING_PERIOD < block.timestamp;
     }
 
-    /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called successfully.
+    /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called yet.
     /// @return Returns current auction stage.
     function updateStage()
-        external
+        public
         timedTransitions
         returns (Stages)
     {
@@ -119,7 +115,7 @@ contract DAODutchAuction {
     /// @dev Calculates current token price.
     /// @return Returns token price.
     function calcCurrentTokenPrice()
-        external
+        public
         timedTransitions
         returns (uint)
     {
@@ -129,9 +125,6 @@ contract DAODutchAuction {
         return calcTokenPrice();
     }
 
-    /*
-     *  Public functions
-     */
     /// @dev Allows to send a bid to the auction.
     function bid()
         public
@@ -169,12 +162,9 @@ contract DAODutchAuction {
     {
         uint tokenCount = bids[msg.sender] * 10**18 / finalPrice;
         bids[msg.sender] = 0;
-        daoToken.transfer(msg.sender, tokenCount);
+        gnosisToken.transfer(msg.sender, tokenCount);
     }
 
-    /*
-     *  Read functions
-     */
     /// @dev Calculates stop price.
     /// @return Returns stop price.
     function calcStopPrice()
@@ -195,6 +185,9 @@ contract DAODutchAuction {
         return 20000 * 1 ether / (block.number - startBlock + 1);
     }
 
+    /*
+     *  Private functions
+     */
     function finalizeAuction()
         private
     {
@@ -207,7 +200,7 @@ contract DAODutchAuction {
         }
         uint soldTokens = totalRaised * 10**18 / finalPrice;
         // Auction contract transfers all unsold tokens to founders' multisig-wallet
-        daoToken.transfer(wallet, TOTAL_TOKENS * 10**18 - soldTokens);
+        gnosisToken.transfer(wallet, TOTAL_TOKENS * 10**18 - soldTokens);
         endTime = block.timestamp;
     }
 }
