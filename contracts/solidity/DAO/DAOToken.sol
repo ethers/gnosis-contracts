@@ -36,11 +36,11 @@ contract DAOToken is StandardToken {
     /// @dev Transfers sender's tokens to a given address. Returns success.
     /// @param to Address of token receiver.
     /// @param value Number of tokens to transfer.
-    /// @return success Returns success of function call.
+    /// @return Returns success of function call.
     function transfer(address to, uint256 value)
         public
         tokenLaunched
-        returns (bool success)
+        returns (bool)
     {
         return super.transfer(to, value);
     }
@@ -49,11 +49,11 @@ contract DAOToken is StandardToken {
     /// @param from Address from where tokens are withdrawn.
     /// @param to Address to where tokens are sent.
     /// @param value Number of tokens to transfer.
-    /// @return success Returns success of function call.
+    /// @return Returns success of function call.
     function transferFrom(address from, address to, uint256 value)
         public
         tokenLaunched
-        returns (bool success)
+        returns (bool)
     {
         return super.transferFrom(from, to, value);
     }
