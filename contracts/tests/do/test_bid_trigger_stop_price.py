@@ -3,7 +3,7 @@ from ..abstract_test import AbstractTestContract, accounts, keys, TransactionFai
 
 class TestContract(AbstractTestContract):
     """
-    run test with python -m unittest contracts.tests.dao.test_bid_trigger_stop_price
+    run test with python -m unittest contracts.tests.do.test_bid_trigger_stop_price
 
     A bid triggers the stop price to be higher than the token price, thus ending the auction instantly.
     Based on test_dao_dutch_auction_stop_price
