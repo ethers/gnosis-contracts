@@ -17,21 +17,9 @@ class TestContract(AbstractTestContract):
         self.deploy_contracts = [self.dao_token_name, self.dao_auction_name]
 
     def test(self):
-        # Create mist wallet
-        required_accounts = 1
-        daily_limit = 0
-        wa_1 = 1
-        constructor_parameters = (
-            [accounts[wa_1]],
-            required_accounts,
-            daily_limit
-        )
-        self.mist_wallet = self.s.abi_contract(
-            self.pp.process(self.WALLETS_DIR + 'MistWallet.sol', add_dev_code=True, contract_dir=self.contract_dir),
-            language='solidity',
-            constructor_parameters=constructor_parameters
-        )
         # Create wallet
+        wa_1 = 1
+        required_accounts = 1
         constructor_parameters = (
             [accounts[wa_1]],
             required_accounts
@@ -41,9 +29,9 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dao_auction.setup(self.dao_token.address, self.multisig_wallet.address, self.mist_wallet.address)
+        self.dao_auction.setup(self.dao_token.address, self.multisig_wallet.address)
         # Setups cannot be done twice
-        self.assertRaises(TransactionFailed, self.dao_auction.setup, self.dao_token.address, self.mist_wallet.address)
+        self.assertRaises(TransactionFailed, self.dao_auction.setup, self.dao_token.address)
         # Bidder 1 places a bid in the first block after auction starts
         self.assertEqual(self.dao_auction.calcTokenPrice(), 20000 * 10**18)
         bidder_1 = 0

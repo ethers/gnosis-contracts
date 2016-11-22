@@ -24,8 +24,7 @@ contract DAODutchAuction {
     /*
      *  Storage
      */
-    address public tokenWallet;
-    address public etherWallet;
+    address public wallet;
     address public owner;
     uint public startBlock;
     uint public endTime;
@@ -81,17 +80,16 @@ contract DAODutchAuction {
 
     /// @dev Setup function sets external contracts' addresses.
     /// @param _daoToken DAO token address.
-    /// @param _tokenWallet DAO founders address.
-    function setup(address _daoToken, address _tokenWallet, address _etherWallet)
+    /// @param _wallet DAO founders address.
+    function setup(address _daoToken, address _wallet)
         external
         isOwner
     {
-        if (tokenWallet != 0 || etherWallet != 0 || address(daoToken) != 0) {
+        if (wallet != 0 || address(daoToken) != 0) {
             // Setup was executed already
             throw;
         }
-        tokenWallet = _tokenWallet;
-        etherWallet = _etherWallet;
+        wallet = _wallet;
         daoToken = Token(_daoToken);
     }
 
@@ -99,31 +97,31 @@ contract DAODutchAuction {
      * External functions
      */
     /// @dev Returns if one week after auction passed.
-    /// @return launched Returns if one week after auction passed.
+    /// @return Returns if one week after auction passed.
     function tokenLaunched()
         external
         timedTransitions
-        returns (bool launched)
+        returns (bool)
     {
         return endTime + WAITING_PERIOD < block.timestamp;
     }
 
     /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called successfully.
-    /// @return _stage Returns current auction stage.
+    /// @return Returns current auction stage.
     function updateStage()
         external
         timedTransitions
-        returns (Stages _stage)
+        returns (Stages)
     {
         return stage;
     }
 
     /// @dev Calculates current token price.
-    /// @return tokenPrice Returns token price.
+    /// @return Returns token price.
     function calcCurrentTokenPrice()
         external
         timedTransitions
-        returns (uint tokenPrice)
+        returns (uint)
     {
         if (stage == Stages.AuctionEnded) {
             return finalPrice;
@@ -151,7 +149,7 @@ contract DAODutchAuction {
             }
         }
         // Forward funding to ether wallet
-        if (investment == 0 || !etherWallet.send(investment)) {
+        if (investment == 0 || !wallet.send(investment)) {
             // No investment done or sending failed
             throw;
         }
@@ -178,21 +176,21 @@ contract DAODutchAuction {
      *  Read functions
      */
     /// @dev Calculates stop price.
-    /// @return stopPrice Returns stop price.
+    /// @return Returns stop price.
     function calcStopPrice()
         constant
         public
-        returns (uint stopPrice)
+        returns (uint)
     {
         return totalRaised / MAX_TOKENS_SOLD;
     }
 
     /// @dev Calculates token price.
-    /// @return tokenPrice Returns token price.
+    /// @return Returns token price.
     function calcTokenPrice()
         constant
         public
-        returns (uint tokenPrice)
+        returns (uint)
     {
         return 20000 * 1 ether / (block.number - startBlock + 1);
     }
@@ -209,7 +207,7 @@ contract DAODutchAuction {
         }
         uint soldTokens = totalRaised * 10**18 / finalPrice;
         // Auction contract transfers all unsold tokens to founders' multisig-wallet
-        daoToken.transfer(tokenWallet, TOTAL_TOKENS * 10**18 - soldTokens);
+        daoToken.transfer(wallet, TOTAL_TOKENS * 10**18 - soldTokens);
         endTime = block.timestamp;
     }
 }

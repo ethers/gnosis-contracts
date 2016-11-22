@@ -18,18 +18,7 @@ class TestContract(AbstractTestContract):
     def test(self):
         # Create mist wallet
         required_accounts = 1
-        daily_limit = 0
         wa_1 = 1
-        constructor_parameters = (
-            [accounts[wa_1]],
-            required_accounts,
-            daily_limit
-        )
-        self.mist_wallet = self.s.abi_contract(
-            self.pp.process(self.WALLETS_DIR + 'MistWallet.sol', add_dev_code=True, contract_dir=self.contract_dir),
-            language='solidity',
-            constructor_parameters=constructor_parameters
-        )
         # Create wallet
         constructor_parameters = (
             [accounts[wa_1]],
@@ -40,7 +29,7 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dao_auction.setup(self.dao_token.address, self.multisig_wallet.address, self.mist_wallet.address)
+        self.dao_auction.setup(self.dao_token.address, self.multisig_wallet.address)
         # Bidder 1 places a bid in the first block after auction starts
         self.assertEqual(self.dao_auction.calcTokenPrice(), 20000 * 10**18)
         bidder_1 = 0
@@ -79,4 +68,4 @@ class TestContract(AbstractTestContract):
             self.TOTAL_TOKENS - self.dao_auction.totalRaised() * 10 ** 18 / self.dao_auction.finalPrice())
         self.assertEqual(self.dao_token.totalSupply(), self.TOTAL_TOKENS)
         # All funds went to the multisig wallet
-        self.assertEqual(self.s.block.get_balance(self.mist_wallet.address), 1000000 * 10**18)
+        self.assertEqual(self.s.block.get_balance(self.multisig_wallet.address), 1000000 * 10**18)
