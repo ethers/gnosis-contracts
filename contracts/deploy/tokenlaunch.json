@@ -29,15 +29,6 @@
     },
     {
         "type": "deployment",
-        "file": "Wallets/MistWallet.sol",
-        "params": [
-            ["dceceaf3fc5c0a63d195d69b1a90011b7b19650d", "598443f1880ef585b21f1d7585bd0577402861e5"],
-            2,
-            0
-        ]
-    },
-    {
-        "type": "deployment",
         "file": "DAO/DAODutchAuction.sol"
     },
     {
@@ -50,7 +41,7 @@
         "contract": "DAODutchAuction",
         "name": "setup",
         "params": [
-            "DAOToken", "MultiSigWallet", "MistWallet"
+            "DAOToken", "MultiSigWallet"
         ]
     }
 ]
