@@ -2,7 +2,7 @@ pragma solidity 0.4.4;
 import "Tokens/AbstractToken.sol";
 
 
-/// @title Dutch auction contract - Sale of Gnosis tokens.
+/// @title Dutch auction contract - creation of Gnosis tokens.
 /// @author Stefan George - <stefan.george@consensys.net>
 contract DutchAuction {
 

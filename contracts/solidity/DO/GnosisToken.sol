@@ -37,10 +37,9 @@ contract GnosisToken is StandardToken {
     function GnosisToken(address _dutchAuction)
         public
     {
+        totalSupply = 10000000 * 10**18;
         dutchAuction = DutchAuction(_dutchAuction);
-        uint _totalSupply = 10000000 * 10**18;
-        balances[_dutchAuction] = _totalSupply;
-        totalSupply = _totalSupply;
+        balances[_dutchAuction] = totalSupply;
     }
 
     /// @dev Transfers sender's tokens to a given address. Returns success.
