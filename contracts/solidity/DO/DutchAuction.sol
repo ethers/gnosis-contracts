@@ -9,7 +9,7 @@ contract DutchAuction {
     /*
      *  Events
      */
-    event BidSubmission(address indexed investor, uint256 amount);
+    event BidSubmission(address indexed sender, uint256 amount);
 
     /*
      *  Constants
@@ -132,26 +132,26 @@ contract DutchAuction {
         timedTransitions
         atStage(Stages.AuctionStarted)
     {
-        uint investment = msg.value;
-        if (totalRaised + investment > FUNDING_GOAL) {
-            investment = FUNDING_GOAL - totalRaised;
+        uint amount = msg.value;
+        if (totalRaised + amount > FUNDING_GOAL) {
+            amount = FUNDING_GOAL - totalRaised;
             // Send change back
-            if (!msg.sender.send(msg.value - investment)) {
+            if (!msg.sender.send(msg.value - amount)) {
                 // Sending failed
                 throw;
             }
         }
         // Forward funding to ether wallet
-        if (investment == 0 || !wallet.send(investment)) {
-            // No investment done or sending failed
+        if (amount == 0 || !wallet.send(amount)) {
+            // No amount sent or sending failed
             throw;
         }
-        bids[msg.sender] += investment;
-        totalRaised += investment;
+        bids[msg.sender] += amount;
+        totalRaised += amount;
         if (totalRaised == FUNDING_GOAL) {
             finalizeAuction();
         }
-        BidSubmission(msg.sender, investment);
+        BidSubmission(msg.sender, amount);
     }
 
     /// @dev Claims tokens for bidder after auction.
