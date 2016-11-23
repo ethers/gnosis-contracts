@@ -1,3 +1,5 @@
+## This security_audit branch has been simplified for the Gnosis token launch (and is what will be deployed).  Some of the README below is relevant, some of it is not or is outdated.
+
 Gnosis Smart Contracts
 ===================
 
