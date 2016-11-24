@@ -27,7 +27,7 @@ contract DutchAuction {
     address public owner;
     uint public startBlock;
     uint public endTime;
-    uint public totalRaised;
+    uint public totalReceived;
     uint public finalPrice;
     mapping (address => uint) public bids;
     Stages public stage = Stages.AuctionStarted;
@@ -133,8 +133,8 @@ contract DutchAuction {
         atStage(Stages.AuctionStarted)
     {
         uint amount = msg.value;
-        if (totalRaised + amount > CEILING) {
-            amount = CEILING - totalRaised;
+        if (totalReceived + amount > CEILING) {
+            amount = CEILING - totalReceived;
             // Send change back
             if (!msg.sender.send(msg.value - amount)) {
                 // Sending failed
@@ -147,8 +147,8 @@ contract DutchAuction {
             throw;
         }
         bids[msg.sender] += amount;
-        totalRaised += amount;
-        if (totalRaised == CEILING) {
+        totalReceived += amount;
+        if (totalReceived == CEILING) {
             finalizeAuction();
         }
         BidSubmission(msg.sender, amount);
@@ -172,7 +172,7 @@ contract DutchAuction {
         public
         returns (uint)
     {
-        return totalRaised / MAX_TOKENS_SOLD;
+        return totalReceived / MAX_TOKENS_SOLD;
     }
 
     /// @dev Calculates token price.
@@ -192,13 +192,13 @@ contract DutchAuction {
         private
     {
         stage = Stages.AuctionEnded;
-        if (totalRaised == CEILING) {
+        if (totalReceived == CEILING) {
             finalPrice = calcTokenPrice();
         }
         else {
             finalPrice = calcStopPrice();
         }
-        uint soldTokens = totalRaised * 10**18 / finalPrice;
+        uint soldTokens = totalReceived * 10**18 / finalPrice;
         // Auction contract transfers all unsold tokens to founders' multisig-wallet
         gnosisToken.transfer(wallet, TOTAL_TOKENS * 10**18 - soldTokens);
         endTime = block.timestamp;

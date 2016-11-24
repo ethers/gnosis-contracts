@@ -84,9 +84,9 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_3]),
                          wei_bid3 * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.balanceOf(self.multisig_wallet.address),
-                         self.TOTAL_TOKENS - self.dutch_auction.totalRaised() * 10 ** 18 / self.dutch_auction.finalPrice())
+                         self.TOTAL_TOKENS - self.dutch_auction.totalReceived() * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
-        self.assertEqual(self.dutch_auction.totalRaised() / 1e18, 1.25e6)
+        self.assertEqual(self.dutch_auction.totalReceived() / 1e18, 1.25e6)
         # Auction ended but trading is not possible yet, because there is one week pause after auction ends
         transfer_shares = 1000
         bidder_4 = 3
