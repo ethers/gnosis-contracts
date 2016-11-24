@@ -199,7 +199,7 @@ contract DutchAuction {
             finalPrice = calcStopPrice();
         }
         uint soldTokens = totalReceived * 10**18 / finalPrice;
-        // Auction contract transfers all unsold tokens to founders' multisig-wallet
+        // Auction contract transfers all unsold tokens to Gnosis inventory multisig
         gnosisToken.transfer(wallet, TOTAL_TOKENS * 10**18 - soldTokens);
         endTime = block.timestamp;
     }
