@@ -14,7 +14,7 @@ contract DutchAuction {
     /*
      *  Constants
      */
-    uint constant public FUNDING_GOAL = 1250000 ether;
+    uint constant public CEILING = 1250000 ether;
     uint constant public TOTAL_TOKENS = 10000000; // 10M
     uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
     uint constant public WAITING_PERIOD = 7 days;
@@ -133,8 +133,8 @@ contract DutchAuction {
         atStage(Stages.AuctionStarted)
     {
         uint amount = msg.value;
-        if (totalRaised + amount > FUNDING_GOAL) {
-            amount = FUNDING_GOAL - totalRaised;
+        if (totalRaised + amount > CEILING) {
+            amount = CEILING - totalRaised;
             // Send change back
             if (!msg.sender.send(msg.value - amount)) {
                 // Sending failed
@@ -148,7 +148,7 @@ contract DutchAuction {
         }
         bids[msg.sender] += amount;
         totalRaised += amount;
-        if (totalRaised == FUNDING_GOAL) {
+        if (totalRaised == CEILING) {
             finalizeAuction();
         }
         BidSubmission(msg.sender, amount);
@@ -192,7 +192,7 @@ contract DutchAuction {
         private
     {
         stage = Stages.AuctionEnded;
-        if (totalRaised == FUNDING_GOAL) {
+        if (totalRaised == CEILING) {
             finalPrice = calcTokenPrice();
         }
         else {
