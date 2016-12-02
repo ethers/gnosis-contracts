@@ -68,7 +68,7 @@ class TestContract(AbstractTestContract):
                          self.gnosis_token.balanceOf(accounts[bidder_2]))
         self.assertEqual(
             self.gnosis_token.balanceOf(self.multisig_wallet.address),
-            self.TOTAL_TOKENS - self.dutch_auction.totalRaised() * 10 ** 18 / self.dutch_auction.finalPrice())
+            self.TOTAL_TOKENS - self.dutch_auction.totalReceived() * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
         # All funds went to the multisig wallet
         self.assertEqual(self.s.block.get_balance(self.multisig_wallet.address), 1000000 * 10**18)
