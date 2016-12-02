@@ -99,7 +99,7 @@ contract DutchAuction {
         timedTransitions
         returns (bool)
     {
-        return endTime + WAITING_PERIOD < block.timestamp;
+        return block.timestamp > endTime + WAITING_PERIOD;
     }
 
     /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called yet.
