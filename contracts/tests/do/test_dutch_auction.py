@@ -72,13 +72,10 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.dutch_auction.finalPrice(), self.dutch_auction.calcTokenPrice())
         # There is no money left in the contract
         self.assertEqual(self.s.block.get_balance(self.dutch_auction.address), 0)
-        # Everyone gets their tokens
-        self.dutch_auction.claimTokens(sender=keys[bidder_1])
+        # Bidder 2 and 3 claim their tokens before the waiting period is over
         self.dutch_auction.claimTokens(sender=keys[bidder_2])
         self.dutch_auction.claimTokens(sender=keys[bidder_3])
         # Confirm token balances
-        self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_1]),
-                         value_1 * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_2]),
                          value_2 * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_3]),
@@ -96,6 +93,10 @@ class TestContract(AbstractTestContract):
         self.assertRaises(TransactionFailed, self.gnosis_token.transfer, accounts[bidder_4], transfer_shares, sender=keys[bidder_3])
         # Go past one week
         self.s.block.timestamp += 1
+        # Bidder 1 claim his tokens after the waiting period is over
+        self.dutch_auction.claimTokens(sender=keys[bidder_1])
+        self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_1]),
+                         value_1 * 10 ** 18 / self.dutch_auction.finalPrice())
         # Shares can be traded now. Backer 3 transfers 1000 shares to backer 4.
         self.assertTrue(self.gnosis_token.transfer(accounts[bidder_4], transfer_shares, sender=keys[bidder_3]))
         self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_4]), transfer_shares)
