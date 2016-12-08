@@ -14,7 +14,7 @@ contract DutchAuction {
     /*
      *  Constants
      */
-    uint constant public CEILING = 1250000 ether;
+    uint constant public CEILING = 1500000 ether;
     uint constant public TOTAL_TOKENS = 10000000; // 10M
     uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
     uint constant public WAITING_PERIOD = 7 days;
