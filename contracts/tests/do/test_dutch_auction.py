@@ -25,7 +25,7 @@ class TestContract(AbstractTestContract):
             required_accounts
         )
         self.multisig_wallet = self.s.abi_contract(
-            self.pp.process('Wallets/MultiSigWallet.sol', add_dev_code=True, contract_dir=self.contract_dir),
+            self.pp.process('Wallets/MultiSigWalletWithDailyLimit.sol', add_dev_code=True, contract_dir=self.contract_dir),
             language='solidity',
             constructor_parameters=constructor_parameters
         )
