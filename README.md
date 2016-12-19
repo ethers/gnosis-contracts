@@ -1,4 +1,4 @@
-## The multisig wallet files are from https://github.com/ConsenSys/MultiSigWallet/tree/004da438880fbdc23ab345dca7d086b0e01abb6d/contracts/solidity
+## The multisig wallet files are from https://github.com/ConsenSys/MultiSigWallet/tree/61ee12bd163eaa006e84c8eb1411e14119f72f7c/contracts/solidity
 
 ## This security_audit branch has been simplified for the Gnosis token launch (and is what will be deployed).  Some of the README below is relevant, some of it is not or is outdated.
 
